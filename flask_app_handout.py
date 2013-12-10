@@ -58,7 +58,7 @@ def get_item_by_batch(item_id=None):
         return jsonify({'items_batch': items})
     else:
         return jsonify({'error': 'Fuckup Error'})
-
+# Anton
 
 """3
 curl -D /dev/stdout -H "Content-Type: application/json" -X POST -d '{"name":"Shadow book", "description": "the book of shadows"}' http://localhost:5000/wow/api/v1.0/items/
@@ -73,10 +73,9 @@ def create_item():
         'name': request.json['name'],
         'description': request.json.get('description', ""),
     }
-    # your code here
     items = items_store.insert(item)
     return jsonify({'result': True})
-
+# Anton 
 """4
 curl -D /dev/stdout -H "Content-Type: application/json" -X PUT -d '{"name": "WhoreCleaner"}' http://localhost:5000/wow/api/v1.0/items/42
 Обновляем предмет. Добавляем, если не существует
