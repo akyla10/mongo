@@ -25,7 +25,7 @@ def hello(name=None):
         name = 'Mr.Nobody'
     return "<h>Hello, %s!</h>" % name
 
-"""
+"""1
 curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items/42
 Получаем предмет по его id. Если не указак, то выдаем количество предметов,
 у которых указан spell в itemSpells.
@@ -42,7 +42,7 @@ def get_item_by_id(item_id=None):
         cnt = None # your code here
         return jsonify({'items_with_spells': cnt})
 
-"""
+"""2
 curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items_batch/?batch=42-55
 Выдаем предметы в интервале id'шников. При это предметы должны иметь отличную от 0
 цену продажи и покупки. Сортируем по возрастанию цену покупки, по убыванию - цену продажи
@@ -59,7 +59,7 @@ def get_item_by_batch(item_id=None):
         return jsonify({'error': 'Fuckup Error'})
 
 
-"""
+"""3
 curl -D /dev/stdout -H "Content-Type: application/json" -X POST -d '{"name":"Shadow book", "description": "the book of shadows"}' http://localhost:5000/wow/api/v1.0/items/
 Добавляем новый предмет
 """
@@ -73,9 +73,10 @@ def create_item():
         'description': request.json.get('description', ""),
     }
     # your code here
+    items = items_store.insert(item)
     return jsonify({'result': True})
 
-"""
+"""4
 curl -D /dev/stdout -H "Content-Type: application/json" -X PUT -d '{"name": "WhoreCleaner"}' http://localhost:5000/wow/api/v1.0/items/42
 Обновляем предмет. Добавляем, если не существует
 """
@@ -91,7 +92,7 @@ def update_item(item_id):
     # your code here
     return jsonify({'result': True})
 
-"""
+"""5
 curl -D /dev/stdout  -X DELETE  http://localhost:5000/wow/api/v1.0/items/42
 Удаляем предмет
 """
@@ -103,7 +104,7 @@ def delete_item(item_id):
     # your code here
     return jsonify({'result': True})
 
-"""
+"""6
 wget -qO- http://127.0.0.1:5000/wow/api/v1.0/items/?speed=1.0&damage=1-10&dps=1.0
 Ищем предмет с указканным диапазоном урона, со скоростью больше указанной, с dps больше указанного.
 """
