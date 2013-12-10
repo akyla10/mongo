@@ -108,8 +108,9 @@ def delete_item(item_id):
     if not item:
         abort(404)
     # your code here
+    items_store.remove( { "id" : 42 } )
     return jsonify({'result': True})
-
+#Anton
 """6
 wget -qO- http://127.0.0.1:5000/wow/api/v1.0/items/?speed=1.0&damage=1-10&dps=1.0
 Ищем предмет с указканным диапазоном урона, со скоростью больше указанной, с dps больше указанного.
