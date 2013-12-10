@@ -33,13 +33,14 @@ curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items/42
 @app.route(APP_PREFIX + '/items/<int:item_id>', methods = ['GET'])
 @app.route(APP_PREFIX + '/items/', methods = ['GET'])
 def get_item_by_id(item_id=None):
-    start =  time()
+    """S. Finish"""
+    start = time()
     item = items_store.find_one({'id': item_id}, {'_id': False}) if item_id else None
     if item:
         item['query_time'] =  time() - start
         return jsonify(item)
     else:
-        cnt = None # your code here
+        cnt = mongodb.db.items.find({'itemSpells.spellId' : {'$exists' : True}}).count()
         return jsonify({'items_with_spells': cnt})
 
 """2
