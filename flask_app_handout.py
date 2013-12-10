@@ -52,7 +52,7 @@ curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items_batch/?batch=42-55
 def get_item_by_batch():
     batch = request.args.get('batch', '0-10').split('-')  
     batch_min, batch_max = int(batch[0]), int(batch[1])
-    items = items_store.find({'id': { '$gte': batch_min, '$lte': batch_max }, 'buyPrice' : { '$ne': 0 }, 'sellPrice' : { '$ne': 0 } } , {'_id': False}).sort( { 'buyPrice' : 1, 'sellPrice' : -1 } ); # по возрастанию (1) и по убыванию (- 1)
+    items = items_store.find({'id': { '$gte': batch_min, '$lte': batch_max }, 'buyPrice' : { '$ne': 0 }, 'sellPrice' : { '$ne': 0 } } , {'_id': False}).sort([ ('buyPrice', 1), ('sellPrice', -1) ]); # по возрастанию (1) и по убыванию (- 1)
     items = [i for i in items]
     if items:
         return jsonify({'items_batch': items})
