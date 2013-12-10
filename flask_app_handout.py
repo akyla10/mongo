@@ -37,7 +37,7 @@ def get_item_by_id(item_id=None):
     start = time()
     item = items_store.find_one({'id': item_id}, {'_id': False}) if item_id else None
     if item:
-        item['query_time'] =  time() - start
+        item['query_time'] = time() - start
         return jsonify(item)
     else:
         cnt = mongodb.db.items.find({'itemSpells.spellId' : {'$exists' : True}}).count()
@@ -49,7 +49,7 @@ curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items_batch/?batch=42-55
 цену продажи и покупки. Сортируем по возрастанию цену покупки, по убыванию - цену продажи
 """
 @app.route(APP_PREFIX + '/items_batch/', methods = ['GET'])
-def get_item_by_batch(item_id=None):
+def get_item_by_batch():
     batch = request.args.get('batch', '0-10').split('-')  
     batch_min, batch_max = int(batch[0]), int(batch[1])
     items = items_store.find({'id': { '$gte': batch_min, '$lte': batch_max }, 'buyPrice' : { '$ne': 0 }, 'sellPrice' : { '$ne': 0 } } , {'_id': False}).sort( { 'buyPrice' : 1, 'sellPrice' : -1 } ); # по возрастанию (1) и по убыванию (- 1)
@@ -82,6 +82,7 @@ curl -D /dev/stdout -H "Content-Type: application/json" -X PUT -d '{"name": "Who
 """
 @app.route(APP_PREFIX + '/items/<int:item_id>', methods = ['PUT'])
 def update_item(item_id):
+    """S. Finish"""
     item = items_store.find_one({'id': item_id}, {'_id': False})
     if not item:
         abort(404)
@@ -89,7 +90,12 @@ def update_item(item_id):
         abort(400)
     name = request.json.get('name', item['name'])
     description = request.json.get('description', item['description'])
-    # your code here
+
+    if item:
+        mongodb.db.items.update({'id': item_id}, {'$set': {'name': name, 'description': description}})
+    else:
+        mongodb.db.items.insert({'id': item_id, 'name': name, 'description': description, '_id': False})
+
     return jsonify({'result': True})
 
 """5
