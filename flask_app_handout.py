@@ -106,7 +106,7 @@ def delete_item(item_id):
     return jsonify({'result': True})
 #Anton
 """6
-wget -qO- http://127.0.0.1:5000/wow/api/v1.0/items/?speed=1.0&damage=1-10&dps=1.0
+wget -qO- http://127.0.0.1:5000/wow/api/v1.0/weapons/?speed=1.0&damage=1-10&dps=1.0
 Ищем предмет с указканным диапазоном урона, со скоростью больше указанной, с dps больше указанного.
 """
 @app.route(APP_PREFIX + '/weapons/', methods = ['GET'])
@@ -115,14 +115,17 @@ def get_weapon():
     speed = request.args.get('speed', '0.0')
     damage = request.args.get('damage', '0-0').split('-')  
     damage_min, damage_max = int(damage[0]), int(damage[1])
-    items = None # your code here
+
+    items = items_store.find({"weaponInfo.damage.maxDamage": damage_max, "weaponInfo.damage.minDamage": damage_min , "weaponInfo.dps": { "$gt": dps }, "weaponInfo.weaponSpeed": { "$gt": speed }  }, {'_id': False}); 
+
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
     else:
         return jsonify({'error': 'No such item'})
 
-"""
+#Anton. Запрос вроде правильный, но возващает чуть больше, чем нефига
+"""7
 wget -qO- http://127.0.0.1:5000/wow/api/v1.0/items_w_spells/?level=8&buyPrice=0-111
 Ищем предметы в указанном диапазоне buyPrice, при этом они должны иметь отличный от пустого
 параметр itemSpells. Ну, и должны быть ниже указанного level
@@ -139,15 +142,17 @@ def get_item_w_spells_by_price():
     else:
         return jsonify({'error': 'No such item'})
 
-"""
+"""8
 wget -qO- http://127.0.0.1:5000/wow/api/v1.0/armor/?armor=0&name_like=shadow
 Ищем предметы, у которых baseArmor выше указанного, а имя подходит по шаблон name_like
 """
 @app.route(APP_PREFIX + '/armor/', methods = ['GET'])
 def get_armor():
     name_like = request.args.get('name_like', 'death')
-    armor = request.args.get('armor', '0')  
-    items = None # your code here
+    armor = request.args.get('armor', '0') 
+    print "\n\n" + armor + "\n\n"
+    items = items_store.find({ "baseArmor" : { "$gt" : armor } }, {'_id': False} )
+    
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
