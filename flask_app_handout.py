@@ -51,7 +51,7 @@ curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items_batch/?batch=42-55
 def get_item_by_batch(item_id=None):
     batch = request.args.get('batch', '0-10').split('-')  
     batch_min, batch_max = int(batch[0]), int(batch[1])
-    items = None # your code here
+    items = items_store.find({'id': { '$gte': batch_min, '$lte': batch_max } }, {'_id': False})
     items = [i for i in items]
     if items:
         return jsonify({'items_batch': items})
