@@ -157,7 +157,7 @@ def get_armor():
     name_like = request.args.get('name_like', 'death')
     armor = request.args.get('armor', '0') 
     print "\n\n" + armor + "\n\n"
-    items = items_store.find({ "baseArmor" : { "$gt" : armor } }, {'_id': False} )
+    items = items_store.find({ "baseArmor" : { "$gt" : 5 } }, {'_id': False} ).limit(10) #В противном случае запрос идет долго
     
     items = [i for i in items]
     if items:
@@ -165,6 +165,7 @@ def get_armor():
     else:
         return jsonify({'error': 'No such item'})
 
+#Anton
 """
 -------------------------------------------------------------------------------------------------------
 1. Запустить users.py. Посмотреть, что вышло.
