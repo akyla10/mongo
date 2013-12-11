@@ -154,11 +154,14 @@ wget -qO- http://127.0.0.1:5000/wow/api/v1.0/armor/?armor=0&name_like=shadow
 """
 @app.route(APP_PREFIX + '/armor/', methods = ['GET'])
 def get_armor():
+    '''S. FIX ME'''
     name_like = request.args.get('name_like', 'death')
-    armor = request.args.get('armor', '0') 
-    print "\n\n" + armor + "\n\n"
-    items = items_store.find({ "baseArmor" : { "$gt" : armor } }, {'_id': False} )
-    
+    armor = request.args.get('armor', '0')
+    '''
+     OperationFailure: database error: Unsupported projection option: $regex
+     в консоле работает, тут нет :(
+    '''
+    items = mongodb.db.items.find({"baseArmor": {"$gt": int(armor)}}, {'name': {"$regex": u"[a-zA-Z0-9]*"+name_like+u"[a-zA-Z0-9]*"}})
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
