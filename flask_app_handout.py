@@ -159,7 +159,7 @@ def get_armor():
     armor = request.args.get('armor', '0')
     '''
      OperationFailure: database error: Unsupported projection option: $regex
-     в консоле работает, тут нет :(
+     в консоле работает, тут -- нет :(
     '''
     items = mongodb.db.items.find({"baseArmor": {"$gt": int(armor)}}, {'name': {"$regex": u"[a-zA-Z0-9]*"+name_like+u"[a-zA-Z0-9]*"}})
     items = [i for i in items]
@@ -168,7 +168,7 @@ def get_armor():
     else:
         return jsonify({'error': 'No such item'})
 
-#Anton
+#Anton and Sawa
 """
 -------------------------------------------------------------------------------------------------------
 1. Запустить users.py. Посмотреть, что вышло.
