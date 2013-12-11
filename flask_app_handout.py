@@ -107,8 +107,7 @@ def delete_item(item_id):
     item = items_store.find_one({'id': item_id}, {'_id': False})
     if not item:
         abort(404)
-    # your code here
-    items_store.remove( { "id" : 42 } )
+    items_store.remove({"id": item_id})
     return jsonify({'result': True})
 #Anton
 """6
@@ -138,10 +137,12 @@ wget -qO- http://127.0.0.1:5000/wow/api/v1.0/items_w_spells/?level=8&buyPrice=0-
 """
 @app.route(APP_PREFIX + '/items_w_spells/', methods = ['GET'])
 def get_item_w_spells_by_price():
+    '''S. Finish'''
     level = int(request.args.get('level', 80))
     prices = request.args.get('buyPrice', '0-10000').split('-')  
     price_min, price_max = int(prices[0]), int(prices[1])
-    items = None # your code here
+    items = mongodb.db.items.find({'$and': [{"buyPrice": { '$gte': price_min, '$lte': price_max }},\
+                                            {'itemLevel': {'$lte': level}}]}, {'itemSpells': {'$exists': True}})
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
