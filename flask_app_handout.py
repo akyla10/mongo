@@ -9,11 +9,22 @@ from pymongo import Connection
 from time import time
 app = Flask(__name__)
 
+'''
+Посмотреть потом
+
+import re
+regx = re.compile("^foo", re.IGNORECASE)
+db.users.find_one({«files»: regx})
+
+'''
+
 class mongodb(object):
     from pymongo import MongoClient
     client = MongoClient()
     db = client['wow']
     items = db['items']
+    users = db['users']
+    servers = db['servers']
 
 APP_PREFIX = '/wow/api/v1.0'
 items_store = mongodb().items
@@ -40,7 +51,7 @@ def get_item_by_id(item_id=None):
         item['query_time'] = time() - start
         return jsonify(item)
     else:
-        cnt = mongodb.db.items.find({'itemSpells.spellId' : {'$exists' : True}}).count()
+        cnt = mongodb.db.items.find({'itemSpells.spellId': {'$exists': True}}).count()
         return jsonify({'items_with_spells': cnt})
 
 """2
@@ -52,12 +63,13 @@ curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items_batch/?batch=42-55
 def get_item_by_batch():
     batch = request.args.get('batch', '0-10').split('-')  
     batch_min, batch_max = int(batch[0]), int(batch[1])
-    items = items_store.find({'id': { '$gte': batch_min, '$lte': batch_max }, 'buyPrice' : { '$ne': 0 }, 'sellPrice' : { '$ne': 0 } } , {'_id': False}).sort([ ('buyPrice', 1), ('sellPrice', -1) ]); # по возрастанию (1) и по убыванию (- 1)
+    items = items_store.find({'id': { '$gte': batch_min, '$lte': batch_max }, 'buyPrice' : { '$ne': 0 }, 'sellPrice' :\
+        { '$ne': 0 } } , {'_id': False}).sort([ ('buyPrice', 1), ('sellPrice', -1) ])  # по возрастанию (1) и по убыванию (- 1)
     items = [i for i in items]
     if items:
         return jsonify({'items_batch': items})
     else:
-        return jsonify({'error': 'Fuckup Error'})
+        return jsonify({'error': 'Error'})
 # Anton
 
 """3
@@ -121,7 +133,7 @@ def get_weapon():
     damage = request.args.get('damage', '0-0').split('-')  
     damage_min, damage_max = int(damage[0]), int(damage[1])
 
-    items = items_store.find({"weaponInfo.damage.maxDamage": damage_max, "weaponInfo.damage.minDamage": damage_min , "weaponInfo.dps": { "$gt": dps }, "weaponInfo.weaponSpeed": { "$gt": speed }  }, {'_id': False}); 
+    items = items_store.find({"weaponInfo.damage.maxDamage": damage_max, "weaponInfo.damage.minDamage": damage_min , "weaponInfo.dps": { "$gt": dps }, "weaponInfo.weaponSpeed": { "$gt": speed }  }, {'_id': False});
 
     items = [i for i in items]
     if items:
@@ -174,12 +186,19 @@ def get_armor():
 -------------------------------------------------------------------------------------------------------
 1. Запустить users.py. Посмотреть, что вышло.
 2. Поискать пользователей по индексу, посмотреть explain. Улучшить время путем создания индекса
-3. Поискать пользователей по времени в игре,  посмотреть explain. 
-    Улучшить время путем создания уникального индекса (с удалением дубликатов?)
+
+mongodb.db.users.index_information()
+mongodb.db.users.create_index('uid', 1)
+3. Поискать пользователей по времени в игре,  посмотреть explain.
+Улучшить время путем создания уникального индекса (с удалением дубликатов?)
+
+mongodb.db.users.create_index('time_in_game', 1)
 4. Через коллекцию users посчитать число пользователей на сервере N. 
-    Улучшить время путем создания многоключевого индекса.
+Улучшить время путем создания многоключевого индекса.
+
+??? servers
 5.Найти сервера, где, например, популяция орды > N, а популяция альянса < M. 
-    Улучшить время путем создания составного индекса.
+Улучшить время путем создания составного индекса.
 6. Удалить из половины серверов поле serial_number.
 7. Поискать сервера по серийному номеру. Улучшить время путем создания уникального индекса (разряженного?).
 8. Для коллекции servers посмотреть информацию о индексах, их общий размер и статистику коллекции. То же для users.
