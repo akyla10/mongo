@@ -149,8 +149,10 @@ def get_item_w_spells_by_price():
     level = int(request.args.get('level', 80))
     prices = request.args.get('buyPrice', '0-10000').split('-')  
     price_min, price_max = int(prices[0]), int(prices[1])
-    items = mongodb.db.items.find({'$and': [{"buyPrice": { '$gte': price_min, '$lte': price_max }},\
-                                            {'itemLevel': {'$lte': level}}]}, {'itemSpells': {'$exists': True}})
+    items = mongodb.db.items.find({"buyPrice": {'$gte': price_min, '$lte': price_max},
+                                   'itemLevel': {'$lte': level},
+                                   'itemSpells': {'$exists': True}
+                                 }, {'_id': False})
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
