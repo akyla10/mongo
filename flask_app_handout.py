@@ -22,13 +22,6 @@ class mongodb(object):
 APP_PREFIX = '/wow/api/v1.0'
 items_store = mongodb().items
 
-@app.route("/hello")
-@app.route("/hello/<name>")
-def hello(name=None):
-    if name is None:
-        name = 'Mr.Nobody'
-    return "<h>Hello, %s!</h>" % name
-
 """1
 curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items/42
 Получаем предмет по его id. Если не указак, то выдаем количество предметов,
@@ -37,7 +30,6 @@ curl -D /dev/stdout http://localhost:5000/wow/api/v1.0/items/42
 @app.route(APP_PREFIX + '/items/<int:item_id>', methods = ['GET'])
 @app.route(APP_PREFIX + '/items/', methods = ['GET'])
 def get_item_by_id(item_id=None):
-    """S. Finish"""
     start = time()
     item = items_store.find_one({'id': item_id}, {'_id': False}) if item_id else None
     if item:
@@ -63,8 +55,6 @@ def get_item_by_batch():
         return jsonify({'items_batch': items})
     else:
         return jsonify({'error': 'Error'})
-# Anton
-
 """3
 curl -D /dev/stdout -H "Content-Type: application/json" -X POST -d '{"name":"Shadow book", "description": "the book of shadows"}' http://localhost:5000/wow/api/v1.0/items/
 Добавляем новый предмет
@@ -80,7 +70,6 @@ def create_item():
     }
     items = items_store.insert(item)
     return jsonify({'result': True})
-# Anton 
 """4
 curl -D /dev/stdout -H "Content-Type: application/json" -X PUT -d '{"name": "WhoreCleaner"}' http://localhost:5000/wow/api/v1.0/items/42
 Обновляем предмет. Добавляем, если не существует
@@ -115,7 +104,6 @@ def delete_item(item_id):
         abort(404)
     items_store.remove({"id": item_id})
     return jsonify({'result': True})
-#Anton
 """6
 wget -qO- http://127.0.0.1:5000/wow/api/v1.0/weapons/?speed=1.0&damage=1-10&dps=1.0
 Ищем предмет с указканным диапазоном урона, со скоростью больше указанной, с dps больше указанного.
@@ -145,7 +133,6 @@ wget -qO- http://127.0.0.1:5000/wow/api/v1.0/items_w_spells/?level=8&buyPrice=0-
 """
 @app.route(APP_PREFIX + '/items_w_spells/', methods = ['GET'])
 def get_item_w_spells_by_price():
-    '''S. Finish'''
     level = int(request.args.get('level', 80))
     prices = request.args.get('buyPrice', '0-10000').split('-')  
     price_min, price_max = int(prices[0]), int(prices[1])
@@ -165,13 +152,8 @@ wget -qO- http://127.0.0.1:5000/wow/api/v1.0/armor/?armor=0&name_like=shadow
 """
 @app.route(APP_PREFIX + '/armor/', methods = ['GET'])
 def get_armor():
-    '''S. FIX ME'''
     name_like = request.args.get('name_like', 'death')
     armor = int(request.args.get('armor', '0'))
-    '''
-     OperationFailure: database error: Unsupported projection option: $regex
-     в консоле работает, тут -- нет :(
-    '''
     regx = re.compile(u"[/w]*"+name_like+u"[/w]*", re.IGNORECASE)
     items = mongodb.db.items.find({
                                       "baseArmor": {"$gt": int(armor)},
@@ -184,7 +166,6 @@ def get_armor():
     else:
         return jsonify({'error': 'No such item'})
 
-#Anton and Sawa
 """
 -------------------------------------------------------------------------------------------------------
 1. Запустить users.py. Посмотреть, что вышло.
@@ -225,7 +206,9 @@ db.servers.group(
 5. Посчитать среднюю популяцию для серверов с каждым размером RAM и типом HDD. А затем, основываясь на предыдущих данных
     , среднюю популяцию для серверов  с каждым типом HDD. За один запрос
 6. Найти максимальную, минимальную и среднюю цену покупки (buyPrice) в коллекции items 
-
+avg: mongodb.db.users.aggregate({ '$group': {requests: { $sum:1}, averagetet: { $avg: "$buyPrice"}}})
+min: mongodb.db.items.find({}).sort("buyPrice", 1)[0]
+max: mongodb.db.items.find({}).sort("buyPrice", -1)[0]
 """
 
 if __name__ == "__main__":
