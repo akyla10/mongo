@@ -10,14 +10,6 @@ from pymongo import Connection
 from time import time
 app = Flask(__name__)
 
-'''
-Посмотреть потом
-
-import re
-regx = re.compile("^foo", re.IGNORECASE)
-db.users.find_one({«files»: regx})
-
-'''
 
 class mongodb(object):
     from pymongo import MongoClient
@@ -117,6 +109,7 @@ curl -D /dev/stdout  -X DELETE  http://localhost:5000/wow/api/v1.0/items/42
 """
 @app.route(APP_PREFIX + '/items/<int:item_id>', methods = ['DELETE'])
 def delete_item(item_id):
+    item_id = int(item_id)
     item = items_store.find_one({'id': item_id}, {'_id': False})
     if not item:
         abort(404)
@@ -127,15 +120,18 @@ def delete_item(item_id):
 wget -qO- http://127.0.0.1:5000/wow/api/v1.0/weapons/?speed=1.0&damage=1-10&dps=1.0
 Ищем предмет с указканным диапазоном урона, со скоростью больше указанной, с dps больше указанного.
 """
-@app.route(APP_PREFIX + '/weapons/', methods = ['GET'])
+@app.route(APP_PREFIX + '/weapons/', methods=['GET'])
 def get_weapon():
     dps = request.args.get('dps', '0.0')
     speed = request.args.get('speed', '0.0')
     damage = request.args.get('damage', '0-0').split('-')  
     damage_min, damage_max = int(damage[0]), int(damage[1])
-
-    items = items_store.find({"weaponInfo.damage.maxDamage": damage_max, "weaponInfo.damage.minDamage": damage_min , "weaponInfo.dps": { "$gt": dps }, "weaponInfo.weaponSpeed": { "$gt": speed }  }, {'_id': False});
-
+    items = items_store.find({"weaponInfo.damage.maxDamage": {'$lte': damage_max},
+                              "weaponInfo.damage.minDamage": {'$gte': damage_min},
+                              "weaponInfo.dps": {"$gt": dps},
+                              "weaponInfo.weaponSpeed": {"$gt": speed}
+                             }, {'_id': False}
+                            )
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
@@ -197,10 +193,10 @@ mongodb.db.users.create_index('uid', 1)
 mongodb.db.users.create_index('time_in_game', 1)
 4. Через коллекцию users посчитать число пользователей на сервере N. 
 Улучшить время путем создания многоключевого индекса.
-
 ??? servers
-5.Найти сервера, где, например, популяция орды > N, а популяция альянса < M. 
+5.Найти сервера, где, например, популяция орды > N, а популяция альянса < M.
 Улучшить время путем создания составного индекса.
+!Нет информации о орда/альянс
 6. Удалить из половины серверов поле serial_number.
 7. Поискать сервера по серийному номеру. Улучшить время путем создания уникального индекса (разряженного?).
 8. Для коллекции servers посмотреть информацию о индексах, их общий размер и статистику коллекции. То же для users.
@@ -209,7 +205,8 @@ mongodb.db.users.create_index('time_in_game', 1)
 2. Посчитать число серверов с каждым размером RAM и типом HDD. Отсортировать по RAM
 3. Посчитать общую популяцию для серверов с каждым размером RAM и типом HDD. Отсортировать по размеру популяции
 4. Посчитать общую популяцию для серверов с каждым размером RAM и типом HDD. Отсортировать по размеру популяции
-5. Посчитать среднюю популяцию для серверов с каждым размером RAM и типом HDD. А затем, основываясь на предыдущих данных, среднюю популяцию для серверов  с каждым типом HDD. За один запрос
+5. Посчитать среднюю популяцию для серверов с каждым размером RAM и типом HDD. А затем, основываясь на предыдущих данных
+    , среднюю популяцию для серверов  с каждым типом HDD. За один запрос
 6. Найти максимальную, минимальную и среднюю цену покупки (buyPrice) в коллекции items 
 
 """
