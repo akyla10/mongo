@@ -138,7 +138,6 @@ def get_weapon():
     else:
         return jsonify({'error': 'No such item'})
 
-#Anton. Запрос вроде правильный, но возващает чуть больше, чем нефига
 """7
 wget -qO- http://127.0.0.1:5000/wow/api/v1.0/items_w_spells/?level=8&buyPrice=0-111
 Ищем предметы в указанном диапазоне buyPrice, при этом они должны иметь отличный от пустого
