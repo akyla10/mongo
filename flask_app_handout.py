@@ -4,6 +4,7 @@ from flask import render_template
 from flask import jsonify
 from flask import request
 from flask import abort
+import re
 import pymongo
 from pymongo import Connection
 from time import time
@@ -169,12 +170,13 @@ wget -qO- http://127.0.0.1:5000/wow/api/v1.0/armor/?armor=0&name_like=shadow
 def get_armor():
     '''S. FIX ME'''
     name_like = request.args.get('name_like', 'death')
-    armor = request.args.get('armor', '0')
+    armor = int(request.args.get('armor', '0'))
     '''
      OperationFailure: database error: Unsupported projection option: $regex
      в консоле работает, тут -- нет :(
     '''
-    items = mongodb.db.items.find({"baseArmor": {"$gt": int(armor)}}, {'name': {"$regex": u"[a-zA-Z0-9]*"+name_like+u"[a-zA-Z0-9]*"}})
+    regx = re.compile(u"[a-zA-Z0-9]*"+name_like+u"[a-zA-Z0-9]*", re.IGNORECASE)
+    items = mongodb.db.items.find({"baseArmor": {"$gt": armor}}, {'name': regx}, {'_id': False})
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
