@@ -172,8 +172,12 @@ def get_armor():
      OperationFailure: database error: Unsupported projection option: $regex
      в консоле работает, тут -- нет :(
     '''
-    regx = re.compile(u"[\w]*"+name_like+u"[\w]*", re.IGNORECASE)
-    items = mongodb.db.items.find({"baseArmor": {"$gt": armor}}, {'name': regx}, {'_id': False})
+    regx = re.compile(u"[/w]*"+name_like+u"[/w]*", re.IGNORECASE)
+    items = mongodb.db.items.find({
+                                      "baseArmor": {"$gt": int(armor)},
+                                      'name': regx
+                                  }, {'_id': False}
+                                 )
     items = [i for i in items]
     if items:
         return jsonify({'items': items})
